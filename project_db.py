@@ -1,0 +1,33 @@
+import os
+
+from dotenv import load_dotenv
+from sqlalchemy import String, Float, create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+engine = create_engine(DATABASE_URL, echo=True)
+Session = sessionmaker(bind=engine)
+
+class Base(DeclarativeBase):
+    def create_db(self):
+        Base.metadata.create_all(engine)
+
+    def drop_db(self):
+        Base.metadata.drop_all(engine)
+
+
+class Conversion(Base):
+    __tablename__ = 'conversions'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    from_currency: Mapped[str] = mapped_column(String(3))
+    to_currency: Mapped[str] = mapped_column(String(3))
+    amount: Mapped[float] = mapped_column(Float)
+    result: Mapped[float] = mapped_column(Float)
+
+
+if __name__ == "__main__":
+    base = Base()
+    base.create_db()
